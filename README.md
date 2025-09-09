@@ -30,3 +30,6 @@ RAG (Retrieval Augmented Generation) is one of the many techniques that the rece
 5. Reranker algorithm
 6. Response generation using top-k chunks and LLM
    
+## Considerations for CSC2701
+
+- Simulate changes to the data (such as new data streaming in), and how our pipeline would handle that.
