@@ -19,7 +19,6 @@ RAG (Retrieval Augmented Generation) is one of the many techniques that the rece
 
 
 <img width="1728" height="1452" alt="image" src="https://github.com/user-attachments/assets/8d0c748f-0800-4632-af58-6cb28d27030a" />
-![ml_workflow.png](ml_workflow.png)
 
 
 ### RAG pipeline 
