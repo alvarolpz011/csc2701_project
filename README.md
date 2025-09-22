@@ -2,9 +2,9 @@
 
 RAG over unstructured data is a complex system with many components that impact the overall application's quality. Adjusting any single element can have cascading effects on the others. Thus, investing in comprehensive RAG evaluation can pay dividends through improved user satisfaction, reduced operational overhead, and faster iteration cycles.
 
-## Aspects to Evaluate
+## 1. Aspects to Evaluate
 
-### Evaluating the preprocessing
+### 1.1. Evaluating the preprocessing
 
 **Document Extraction Accuracy**
 - Correctly extracting content from a wide range of input formats (PDFs, webpages, emails, HTMLs, .docx, etc).
@@ -24,7 +24,7 @@ RAG over unstructured data is a complex system with many components that impact 
 - Can the system preserve content / document-level metadata?
 - Use attributes like published date, author, etc. to provide enriched answers
 
-### Evaluating the retrieval
+### 1.2. Evaluating the retrieval
 
 **Query understanding and expansion**
 - Does the system understand the (perhaps unspoken) context behind the user query?
@@ -35,7 +35,7 @@ RAG over unstructured data is a complex system with many components that impact 
 **Ranking quality and relevance**
 - How well does it rank the chunks in order of question relevance?
 
-### Evaluating the generation
+### 1.3. Evaluating the generation
 
 **Factual accuracy and faithfulness**
 - How much do the RAG’s responses stick exclusively to the context? (i.e. they should not answer from their own knowledge even though it may be correct)
@@ -48,7 +48,7 @@ RAG over unstructured data is a complex system with many components that impact 
 - Is the system picking imaginary facts & snippets from the content and providing unfactual responses?
 
 
-### Evaluating the end-to-end system
+### 1.4. Evaluating the end-to-end system
 
 **User experience quality**
 - Is the overall application a smooth experience for users seeking answers?
@@ -61,7 +61,7 @@ RAG over unstructured data is a complex system with many components that impact 
 - Is it reliable at increased loads?
 
 
-### Evaluating the quality in production
+### 1.5. Evaluating the quality in production
 
 Real-World Failure Modes: RAG in production does not work perfectly from the get-go. Even the best models hallucinate when evaluated for hallucination index.
 
@@ -93,11 +93,11 @@ Real-World Failure Modes: RAG in production does not work perfectly from the get
 - Maintaining role consistency
 
 
-## Technical Framework for Evaluation
+## 2. Technical Framework for Evaluation
 
-### Establish the Metrics
+### 2.1. Establish the Metrics
 
-#### For Retrieval
+#### 2.1.1. For Retrieval
 
 **Classical Information Retrieval Metrics**
 - Precision@k = |Relevant ∩ Retrieved@k| / k
@@ -115,7 +115,7 @@ Real-World Failure Modes: RAG in production does not work perfectly from the get
 
 RAG evaluations often adapt precision and recall to work on statements instead of documents, calling a retrieved statement "relevant" if it was present in the ground-truth context.
 
-#### For Generation
+#### 2.1.2. For Generation
 
 **Core Generation Metrics**
 - **Answer Relevancy**: Relevance of generated response to query
@@ -129,7 +129,7 @@ RAG evaluations often adapt precision and recall to work on statements instead o
 - **Refusal Quality**: Appropriate handling of unanswerable queries
 - **Tone Adherence**: Maintenance of desired communication style
 
-### Use LLM-as-a-Judge
+### 2.2. Use LLM-as-a-Judge
 
 A modern and increasingly popular approach for evaluating RAG outputs is the use of large language models as evaluators, commonly referred to as "LLM-as-a-Judge".
 
@@ -159,12 +159,12 @@ def evaluate_faithfulness(query, context, response, judge_model):
 - Use different models for different evaluation aspects
 - Implement cross-validation across multiple judges
 
-#### Use Synthetic Data
+#### 2.2.1. Use Synthetic Data
 
 - We can speed things up by generating synthetic test cases directly from our knowledge base by flipping the usual RAG workflow
 - Start from content and ask an LLM to generate questions and answers
 
-## Explore Libraries & Frameworks
+## 3. Explore Libraries & Frameworks
 
 **RAGAS** - Most Popular
 - Comprehensive metric suite
