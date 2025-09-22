@@ -1,40 +1,10 @@
-# csc2701_project
-
-## Problem Statement
-RAG (Retrieval Augmented Generation) is one of the many techniques that the recent developments in the area of Natural Language Processing, specifically Larga Language Models, have made possible. Unlike traditionally depending on language models that rely solely on their internal knowledge with which they were trained on, RAG combines the generative properties of LLMs with information retrieval systems to generate more accurate and contextually relevant responses based on real information. This approach addresses the limitations of  knowledge in LLMs by dynamically extracting and incorporating up-to-date or domain-specific information to their context. As a result, RAG has gained attention for applications in open-domain question answering, enterprise information search, healthcare, and more. However, developing and deploying an effective RAG system presents challenges that need to be overcome with effective ML Ops practices.
-
-## Data Sources
-- What data are we using for the 
-
-## Plan for EDA and modeling
-
-[RAG Systems Techniques List](https://github.com/NirDiamant/RAG_Techniques)
-
-
-## Initial plan for data exploration and modeling
-
-### Data exploration
-
-
-<img width="1728" height="1452" alt="image" src="https://github.com/user-attachments/assets/8d0c748f-0800-4632-af58-6cb28d27030a" />
-
-
-### RAG pipeline 
-1. Parsing text data from the data source.
-2. Data preprocessing: removing redundant structural emlements like headers/footers, normalizing text 
-2. Chunking. Define the chunking strategy - it can be  a fixed-size, a recursive or a context-aware chunking.
-3. Building embeddings. Decide between using sparse embeddings for keyword retrieval  (like BM25 or TF-IDF) or dense embeddings (like SBERT) to capture semantic meaning. Or use hybrid search and combine these approaches.
-4. Retriever algorithm
-5. Reranker algorithm
-6. Response generation using top-k chunks and LLM
-
-## Evaluation
+# Evaluation
 
 RAG over unstructured data is a complex system with many components that impact the overall application's quality. Adjusting any single element can have cascading effects on the others. Thus, investing in comprehensive RAG evaluation can pay dividends through improved user satisfaction, reduced operational overhead, and faster iteration cycles.
 
-### Aspects to Evaluate
+## Aspects to Evaluate
 
-#### Evaluating the preprocessing
+### Evaluating the preprocessing
 
 **Document Extraction Accuracy**
 - Correctly extracting content from a wide range of input formats (PDFs, webpages, emails, HTMLs, .docx, etc).
@@ -54,7 +24,7 @@ RAG over unstructured data is a complex system with many components that impact 
 - Can the system preserve content / document-level metadata?
 - Use attributes like published date, author, etc. to provide enriched answers
 
-#### Evaluating the retrieval
+### Evaluating the retrieval
 
 **Query understanding and expansion**
 - Does the system understand the (perhaps unspoken) context behind the user query?
@@ -65,7 +35,7 @@ RAG over unstructured data is a complex system with many components that impact 
 **Ranking quality and relevance**
 - How well does it rank the chunks in order of question relevance?
 
-#### Evaluating the generation
+### Evaluating the generation
 
 **Factual accuracy and faithfulness**
 - How much do the RAG’s responses stick exclusively to the context? (i.e. they should not answer from their own knowledge even though it may be correct)
@@ -78,7 +48,7 @@ RAG over unstructured data is a complex system with many components that impact 
 - Is the system picking imaginary facts & snippets from the content and providing unfactual responses?
 
 
-#### Evaluating the end-to-end system
+### Evaluating the end-to-end system
 
 **User experience quality**
 - Is the overall application a smooth experience for users seeking answers?
@@ -91,7 +61,7 @@ RAG over unstructured data is a complex system with many components that impact 
 - Is it reliable at increased loads?
 
 
-#### Evaluating the quality in production
+### Evaluating the quality in production
 
 Real-World Failure Modes: RAG in production does not work perfectly from the get-go. Even the best models hallucinate when evaluated for hallucination index.
 
@@ -123,11 +93,11 @@ Real-World Failure Modes: RAG in production does not work perfectly from the get
 - Maintaining role consistency
 
 
-### Technical Framework for Evaluation
+## Technical Framework for Evaluation
 
-#### Establish the Metrics
+### Establish the Metrics
 
-##### For Retrieval
+#### For Retrieval
 
 **Classical Information Retrieval Metrics**
 - Precision@k = |Relevant ∩ Retrieved@k| / k
@@ -145,7 +115,7 @@ Real-World Failure Modes: RAG in production does not work perfectly from the get
 
 RAG evaluations often adapt precision and recall to work on statements instead of documents, calling a retrieved statement "relevant" if it was present in the ground-truth context.
 
-##### For Generation
+#### For Generation
 
 **Core Generation Metrics**
 - **Answer Relevancy**: Relevance of generated response to query
@@ -159,7 +129,7 @@ RAG evaluations often adapt precision and recall to work on statements instead o
 - **Refusal Quality**: Appropriate handling of unanswerable queries
 - **Tone Adherence**: Maintenance of desired communication style
 
-#### Use LLM-as-a-Judge
+### Use LLM-as-a-Judge
 
 A modern and increasingly popular approach for evaluating RAG outputs is the use of large language models as evaluators, commonly referred to as "LLM-as-a-Judge".
 
@@ -194,7 +164,7 @@ def evaluate_faithfulness(query, context, response, judge_model):
 - We can speed things up by generating synthetic test cases directly from our knowledge base by flipping the usual RAG workflow
 - Start from content and ask an LLM to generate questions and answers
 
-### Explore Libraries & Frameworks
+## Explore Libraries & Frameworks
 
 **RAGAS** - Most Popular
 - Comprehensive metric suite
@@ -227,6 +197,6 @@ def evaluate_faithfulness(query, context, response, judge_model):
 - Strong debugging tools
 
 
-## Considerations for CSC2701
+# Considerations for CSC2701
 
 - Simulate changes to the data (such as new data streaming in), and how our pipeline would handle that.
