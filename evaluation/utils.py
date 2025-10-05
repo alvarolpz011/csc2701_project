@@ -9,7 +9,7 @@ load_dotenv()
 
 def generate(
     user_prompt: str,
-    temperature: int = 0.5,
+    temperature: float = 0.5,
     ):
     """
         Generate a response from the Gemini model.
