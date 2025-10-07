@@ -103,6 +103,59 @@ class RAG:
             chunks.append((chunk_text, chunk_embedding))
 
         return chunks
+        def augment_user_query(self, user_query: str, num_questions: int = 3) -> str:
+        """
+        Augment the user's query by generating related questions
+        using the Gemini API. These related questions help provide
+        richer context for retrieval.
+        """
+        client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+        model = self.language_model
+
+        prompt = f'''Given this user query: "{user_query}"
+
+        Generate exactly {num_questions} related questions that someone asking this might also want to know.
+        Some background info about the program:
+        The MScAC program is a 16-month applied research program designed to educate the next generation of world-class innovators. Students enrol in advanced graduate courses according to the concentration requirements. They also complete an eight-month applied research internship, usually paid, based at an industry partner.
+        Rules:
+        - Make questions specific and directly related to the original query
+        - Cover different aspects (requirements, deadlines, process, eligibility, etc.)
+        - Keep questions concise and clear
+        - Return ONLY a JSON array of questions, nothing else
+        
+        Example format: ["question1?", "question2?", "question3?"]
+        '''
+
+        contents = [
+            types.Content(
+                role="user",
+                parts=[types.Part.from_text(text=prompt)],
+            ),
+        ]
+
+        generate_content_config = types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+            temperature=0.7,
+        )
+
+        response = client.models.generate_content(
+            model=model,
+            contents=contents,
+            config=generate_content_config,
+        )
+
+        response_text = response.text.strip()
+
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+
+        questions = json.loads(response_text)
+        questions_str = " ".join(questions)
+        augmented_query = f"{user_query} {questions_str}"
+
+        return augmented_query
 
     def embed_user_query(self):
         """Embed the user query using the sentence transformer model."""
@@ -211,7 +264,7 @@ class RAG:
         Returns:
             Generated answer from the language model
         """
-        self.user_query = user_query
+        self.user_query = self.augment_user_query(user_query)
 
         self.query_vector = self.embed_user_query()
         self.top_k_chunks = self.retrieve_top_k_relevant_chunks(top_k)
