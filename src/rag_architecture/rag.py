@@ -103,7 +103,7 @@ class RAG:
             chunks.append((chunk_text, chunk_embedding))
 
         return chunks
-        def augment_user_query(self, user_query: str, num_questions: int = 3) -> str:
+    def augment_user_query(self, user_query: str, num_questions: int = 3) -> str:
         """
         Augment the user's query by generating related questions
         using the Gemini API. These related questions help provide
@@ -209,7 +209,59 @@ class RAG:
         chunk = chunk.strip()
 
         return chunk
+    
+    def rag_prompt(self) -> str:
+        context_section = ""
+        for i, chunk_tuple in enumerate(self.top_k_chunks):
+            chunk_text = chunk_tuple[0]  # chunk_tuple = (text, similarity_score)
+            context_section += f"[Chunk {i}]\n{chunk_text}\n\n"
 
+        prompt = f"""You are a helpful assistant answering questions based on the provided context.
+        
+        CONTEXT:
+        {context_section}
+        
+        USER QUESTION:
+        {self.user_query}
+        
+        INSTRUCTIONS:
+        - Answer the question using ONLY the information provided in the context above
+        - If the context doesn't contain enough information to answer the question, say "I don't have enough information in the provided context to answer this question fully."
+        - Be specific and detailed in your answer
+        - Use a natural, conversational tone
+        
+        ANSWER:"""
+        return prompt
+
+    def query_llm(self) -> str:
+        prompt = self.rag_prompt()
+        client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+        model = self.language_model
+
+        contents = [
+            types.Content(
+                role="user",
+                parts=[types.Part.from_text(text=prompt)],
+            ),
+        ]
+
+        generate_content_config = types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+            temperature=0.3,
+        )
+
+        response = client.models.generate_content(
+            model=model,
+            contents=contents,
+            config=generate_content_config,
+        )
+
+        return response.text
+
+    def generate_response_to_user(self):
+        return self.query_llm()
+        
+    '''
     def prepare_retrieval_prompt(self):
         """
         Prepare the retrieval prompt by:
@@ -252,6 +304,7 @@ class RAG:
             user_prompt=self.retrieval_prompt,
             model=self.language_model
         )
+    '''
 
     def __call__(self, user_query: str, top_k: int = 3):
         """
@@ -265,7 +318,6 @@ class RAG:
             Generated answer from the language model
         """
         self.user_query = self.augment_user_query(user_query)
-
         self.query_vector = self.embed_user_query()
         self.top_k_chunks = self.retrieve_top_k_relevant_chunks(top_k)
         self.retrieval_prompt = self.prepare_retrieval_prompt()
