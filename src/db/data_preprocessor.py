@@ -2,7 +2,7 @@ import re
 from typing import List, Dict
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import PointStruct
+from qdrant_client.models import PointStruct, VectorParams, Distance
 from sentence_transformers import SentenceTransformer
 
 
@@ -61,10 +61,41 @@ class DataPreprocessor:
             embeddings_dict[d["title"]] = self.model.encode(d['content'])
         return embeddings_dict
 
-    def upload_to_vector_db(self):
+    def upload_to_vector_db(self, collection_name: str="csc2701"):
         client = QdrantClient(self.vector_db_url)
+
+        all_collections = client.get_collections().collections
+        names = [d.name for d in all_collections]
+        if collection_name not in names:
+            print(f"Creating collection '{collection_name}'")
+            client.create_collection(
+                collection_name=collection_name,
+                vectors_config={
+                    "mscac-dense-vector": VectorParams(
+                        size=384,
+                        distance=Distance.COSINE
+                    ),
+                },
+                sparse_vectors_config={
+                    "mscac-sparse-vector": {
+                        "index": {
+                            "on_disk": False
+                        }
+                    }
+                },
+            )
+
+            client.create_payload_index(
+                collection_name=collection_name,
+                field_name="header",
+                field_schema="keyword",
+            )
+
+        else:
+            print(f"Collection '{collection_name}' already exists")
+
         client.upsert(
-            collection_name="csc2701",
+            collection_name=collection_name,
             points=[
                 PointStruct(
                     id=idx,
