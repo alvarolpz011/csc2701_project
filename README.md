@@ -346,3 +346,11 @@ The machine learning component will be deliberately kept as simple as possible, 
   - Production-ready RAG API.  
   - Monitoring dashboards in AWS.  
 
+
+
+
+## FastApi 
+
+### 1. Run the app locally:
+
+ uvicorn main:app --host 0.0.0.0 --port 8080
