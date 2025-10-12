@@ -232,7 +232,7 @@ class RAG:
         
         ANSWER:"""
         return prompt
-
+    '''
     def query_llm(self) -> str:
         prompt = self.rag_prompt()
         client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
@@ -261,7 +261,6 @@ class RAG:
     def generate_response_to_user(self):
         return self.query_llm()
         
-    '''
     def prepare_retrieval_prompt(self):
         """
         Prepare the retrieval prompt by:
@@ -320,8 +319,8 @@ class RAG:
         self.user_query = self.augment_user_query(user_query)
         self.query_vector = self.embed_user_query()
         self.top_k_chunks = self.retrieve_top_k_relevant_chunks(top_k)
-        self.retrieval_prompt = self.prepare_retrieval_prompt()
+        self.retrieval_prompt = self.rag_prompt()
         print(self.retrieval_prompt)
-        self.response_to_user = self.generate_response_to_user()
-
+        self.response_to_user = utils.ask_llm(user_prompt=self.retrieval_prompt,model=self.language_model)
+        
         return self.response_to_user
