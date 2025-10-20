@@ -85,4 +85,5 @@ v==1
 watchfiles==1.1.0
 websockets==15.0.1
 zstandard==0.25.0
-google-genai
+google-genai==1.43.0
+pydantic==2.11.10
