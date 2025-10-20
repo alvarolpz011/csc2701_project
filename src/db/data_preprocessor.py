@@ -7,7 +7,7 @@ from sentence_transformers import SentenceTransformer
 
 
 class DataPreprocessor:
-    def __init__(self, file_path, model_name="all-MiniLM-L6-v2", vector_db_url="http://3.134.97.74:6333"):
+    def __init__(self, file_path, model_name="all-MiniLM-L6-v2", vector_db_url="http://3.138.107.103:6333"):
         self.file_path = file_path
         self.vector_db_url = vector_db_url
         self.model = SentenceTransformer(model_name)
@@ -56,16 +56,23 @@ class DataPreprocessor:
         return chunks
 
     def create_embeddings(self):
-        embeddings_dict = {}
-        for d in self.hand_book_text_chunks:
-            embeddings_dict[d["title"]] = self.model.encode(d['content'])
-        return embeddings_dict
+        embeddings = []
+        for chunk in self.hand_book_text_chunks:
+            vector = self.model.encode(chunk['content'])
+            embeddings.append({
+                "title": chunk["title"],
+                "content": chunk["content"],
+                "embedding": vector
+            })
+        return embeddings
+    
 
     def upload_to_vector_db(self, collection_name: str="csc2701"):
         client = QdrantClient(self.vector_db_url)
 
         all_collections = client.get_collections().collections
         names = [d.name for d in all_collections]
+
         if collection_name not in names:
             print(f"Creating collection '{collection_name}'")
             client.create_collection(
@@ -75,13 +82,6 @@ class DataPreprocessor:
                         size=384,
                         distance=Distance.COSINE
                     ),
-                },
-                sparse_vectors_config={
-                    "mscac-sparse-vector": {
-                        "index": {
-                            "on_disk": False
-                        }
-                    }
                 },
             )
 
@@ -99,12 +99,14 @@ class DataPreprocessor:
             points=[
                 PointStruct(
                     id=idx,
-                    vector={"mscac-dense-vector": vector.tolist()},
+                    vector={"mscac-dense-vector": item["embedding"].tolist()},
                     payload={
-                        "header": title,
+                        "header": item["title"],
+                        "content": item["content"],
+                        "document_title": self.file_path.split("/")[-1]
                     }
                 )
-                for idx, (title, vector) in enumerate(self.hand_book_embeddings.items())
+                for idx, item in enumerate(self.hand_book_embeddings)
             ]
         )
 

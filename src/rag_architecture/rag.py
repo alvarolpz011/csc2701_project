@@ -10,8 +10,12 @@ import torch
 import numpy as np
 import re
 from sentence_transformers import SentenceTransformer
-
-import prompts, utils
+from qdrant_client import QdrantClient, models
+from .utils import TEMP_CHUNKS, ask_llm, genai, types, load_dotenv, os, base64
+from .prompts import RETRIEVAL_PROMPT
+from dotenv import load_dotenv
+import json
+load_dotenv()
 
 
 class SimilarityMeasure:
@@ -78,15 +82,18 @@ class RAG:
 
     def __init__(
             self,
-            vector_db_url: str = 'http://localhost:6333',
+            vector_db_url: str = 'http://3.138.107.103:6333',
+            vector_db_collection: str= "csc2701",
             embedding_model_name: str = 'all-MiniLM-L6-v2',
             language_model_name: str = 'gemini-2.5-flash-lite'
         ):
 
         self.embedding_model = SentenceTransformer(embedding_model_name)
         self.vector_db_url = vector_db_url
+        self.vector_db_collection = vector_db_collection
+        self.vector_db_client = QdrantClient(self.vector_db_url)
         self.chunks = self.load_chunks_from_vector_db(self.vector_db_url)
-        self.language_model = language_model_name
+        self.language_model = language_model_name 
 
     def load_chunks_from_vector_db(self, vector_db_url: str):
         """
@@ -98,7 +105,7 @@ class RAG:
             List of tuples (chunk_text, chunk_embedding)
         """
         chunks = []
-        for chunk_text in utils.TEMP_CHUNKS:
+        for chunk_text in TEMP_CHUNKS:
             chunk_embedding = self.embedding_model.encode(chunk_text)
             chunks.append((chunk_text, chunk_embedding))
 
@@ -172,13 +179,23 @@ class RAG:
             List of tuples (chunk_text, similarity_score) sorted by similarity
         """
         similarities = []
+        
+        search_results = self.vector_db_client.search(
+            collection_name=self.vector_db_collection,
+            query_vector= models.NamedVector(name= "mscac-dense-vector", vector= self.query_vector),
+            limit=top_k,
+        )
+        print(search_results)
+        for result in search_results:
+            similarities.append((result.payload["header"], result.payload["document_title"], result.payload["content"], result.score)) 
+            #print(result.payload["header"], result.score)
+                
+        #for chunk, chunk_embedding in self.chunks:
+        #    similarity = SimilarityMeasure(self.query_vector, chunk_embedding).similarity
+        #    similarities.append((chunk, similarity))
 
-        for chunk, chunk_embedding in self.chunks:
-            similarity = SimilarityMeasure(self.query_vector, chunk_embedding).similarity
-            similarities.append((chunk, similarity))
-
-        similarities.sort(key=lambda x: x[1], reverse=True)
-        return similarities[:top_k]
+        similarities.sort(key=lambda x: x[3], reverse=True)
+        return similarities
 
     def preprocess_chunk(self, chunk: str) -> str:
         """
@@ -213,7 +230,7 @@ class RAG:
     def rag_prompt(self) -> str:
         context_section = ""
         for i, chunk_tuple in enumerate(self.top_k_chunks):
-            chunk_text = chunk_tuple[0]  # chunk_tuple = (text, similarity_score)
+            chunk_text = chunk_tuple[2]  # NOT USING TEXT DOCUMENT OR TITLE YET
             context_section += f"[Chunk {i}]\n{chunk_text}\n\n"
 
         prompt = f"""You are a helpful assistant answering questions based on the provided context.
@@ -292,7 +309,7 @@ class RAG:
             else:
                 context = "No relevant context found."
 
-        return prompts.RETRIEVAL_PROMPT.format(
+        return RETRIEVAL_PROMPT.format(
             context=context,
             question=self.user_query
         )
@@ -320,7 +337,6 @@ class RAG:
         self.query_vector = self.embed_user_query()
         self.top_k_chunks = self.retrieve_top_k_relevant_chunks(top_k)
         self.retrieval_prompt = self.rag_prompt()
-        print(self.retrieval_prompt)
-        self.response_to_user = utils.ask_llm(user_prompt=self.retrieval_prompt,model=self.language_model)
+        self.response_to_user = ask_llm(user_prompt=self.retrieval_prompt,model=self.language_model)
         
         return self.response_to_user
