@@ -8,7 +8,7 @@ __pycache__/
 
 # macOS files
 .DS_Store
-
+.idea/
 # Distribution / packaging
 .Python
 build/
