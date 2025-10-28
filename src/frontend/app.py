@@ -1,12 +1,12 @@
 import streamlit as st
 import requests
 
-API_URL = "http://localhost:8000/chat"
+API_URL = "http://localhost:8080/chat"
 st.set_page_config(page_title="MScAC Chatbot", page_icon="💬", layout="centered")
 
 st.markdown(
     """
-    <h1 style='text-align: center;'>🎓 MScAC Information Chatbot</h1>
+    <h1 style='text-align: center;'> MScAC Information Chatbot</h1>
     <p style='text-align: center;'>Ask me anything about the program!</p>
     """,
     unsafe_allow_html=True
