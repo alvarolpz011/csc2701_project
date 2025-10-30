@@ -82,7 +82,7 @@ class RAG:
 
     def __init__(
             self,
-            vector_db_url: str = 'http://3.138.107.103:6333',
+            vector_db_url: str = 'http://172.31.41.249:6333',
             vector_db_collection: str= "csc2701",
             embedding_model_name: str = 'all-MiniLM-L6-v2',
             language_model_name: str = 'gemini-2.5-flash-lite'
