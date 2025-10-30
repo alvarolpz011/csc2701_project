@@ -1,0 +1,12 @@
+huggingface-hub==0.35.3
+langchain==0.3.27
+langchain-core==0.3.78
+langchain-text-splitters==0.3.11
+langsmith==0.4.32
+scikit-learn==1.7.2
+scipy==1.16.2
+sentence-transformers==5.1.1
+sympy==1.14.0
+tokenizers==0.22.1
+torch==2.8.0
+transformers==4.57.0
