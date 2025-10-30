@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  backend:
+    build: ./src
+    container_name: rag-backend
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: rag-frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
